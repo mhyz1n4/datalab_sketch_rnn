@@ -1,0 +1,14 @@
+FROM python:2
+
+RUN mkdir -p /sketch_rnn_floder
+WORKDIR /sketch_rnn_floder
+
+RUN pip install tensorflow scipy matplotlib magenta requests
+
+RUN git clone https://github.com/mhyz1n4/datalab_sketch_rnn.git
+
+WORKDIR /sketch_rnn_floder/datalab_sketch_rnn/sketch_rnn
+
+RUN python sketch_rnn_train.py 
+
+RUN touch empty_file
