@@ -110,19 +110,6 @@ lstm_W_xh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/L
 lstm_W_hh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/W_hh:0"][0].eval()
 lstm_bias_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/bias:0"][0].eval()
 
-#output_w = output_w_.tolist()
-#output_b = output_b_.tolist()
-#lstm_W_xh = lstm_W_xh_.tolist()
-#lstm_W_hh = lstm_W_hh_.tolist()
-#lstm_bias = lstm_bias_.tolist()
-
-#model_file = "weight_test.json"
-#rawweights = json.load(open(model_file,'r'))
-#weights = []
-#for w in rawweights:
-    #w = json.loads(w)
-    #npw = np.array(w,dtype=np.float32)
-    #weights.append(npw)
 dec_output_w = output_w_;
 dec_output_b = output_b_;
 dec_lstm_W_xh = lstm_W_xh_;
@@ -241,9 +228,9 @@ def generate(temperature = None, softmax_temperature = None):
 max_seq_len = 123
 scale_factor = 99.698
 
-def get_sketch():
-    sketch = generate()
-    print(sketch)
+def get_sketch(sketch):
+    #sketch = generate()
+    #print(sketch)
     xsum, ysum = [0],[0]
     for i,l in enumerate(sketch):
         xsum.append(l[0]+xsum[i])
@@ -276,24 +263,36 @@ def get_sketch():
 
 
 
-img = np.ones((1000,1000,3), np.uint8)
+#img = np.ones((1000,1000,3), np.uint8)
 #img = cv2.imread('dave.jpg')
-gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+#gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
+'''
 gen_sketch=[]
-#for i in range(6):
+for i in range(10):
     #temp = get_sketch()
     #gen_sketch.append(temp)
-#print(gen_sketch)
+print(gen_sketch)
 temp = get_sketch()
 gen_sketch.append(temp)
+'''
+result = generate()
+output = []
+entry = []
+for i in result:
+    print(i)
+    entry.extend(i[0], i[1])
+    break;
+print(entry)
+#print(result)
 
+'''
 for k in gen_sketch:
     x_axis = k[0]
     y_axis = k[1]
     length = len(x_axis)
-    #print(x_axis)
-    #print(y_axis)
+    print(x_axis)
+    print(y_axis)
 
     for i in range(length):
         if (i == length - 1):
@@ -308,15 +307,19 @@ cv2.destroyAllWindows()
 
 #sample = sample()
 #print(sample)
+'''
 
 '''
 import requests
 
-hostname = "0.0.0.0"
-port = 5000
+hostname = "54.82.94.146"
+port = 80
 check = 0
-for i in range(6):
-    x_array,y_array = get_sketch()
+for i in range(15,25):
+    result = generate()
+    x_array,y_array = get_sketch(result)
+    print(x_array)
+    print(y_array)
     r = requests.post("http://{}:{}/data".format(hostname,port),
                     data = json.dumps({"data":{"x_data":x_array,"y_data":y_array,"id":i,"check":check}}))
 '''
