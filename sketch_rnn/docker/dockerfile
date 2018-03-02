@@ -17,4 +17,4 @@ RUN git clone https://github.com/mhyz1n4/datalab_sketch_rnn.git
 WORKDIR /sketch_rnn_floder/datalab_sketch_rnn/sketch_rnn
 
 RUN touch checkpoints
-RUN python sketch_rnn_train_loop.py --log_root=checkpoints --hparams = "dec_model = lstm, dec_rnn_size = 1024, enc_model = lstm, enc_rnn_size = 512"
+RUN python sketch_rnn_train_loop.py --data_dir=data --log_root=checkpoints --hparams="data_set=[speedboat.npz],dec_model=lstm,dec_rnn_size=1024,enc_model=lstm,enc_rnn_size=512"
