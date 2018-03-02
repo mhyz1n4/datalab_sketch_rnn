@@ -1,9 +1,16 @@
-FROM python:2
+FROM tensorflow/tensorflow:1.1.0-devel
+
+MAINTAINER Curtis Hawthorne <fjord@google.com>
+
+# Download and build Magenta.
+
+ENV MAGENTA_MASTER_REF v0.1.13
+
+# Required for local development
+RUN pip install scipy matplotlib intervaltree bokeh magenta requests
 
 RUN mkdir -p /sketch_rnn_floder
 WORKDIR /sketch_rnn_floder
-
-RUN pip install tensorflow scipy matplotlib magenta requests
 
 RUN git clone https://github.com/mhyz1n4/datalab_sketch_rnn.git
 

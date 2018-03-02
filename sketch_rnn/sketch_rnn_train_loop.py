@@ -515,10 +515,10 @@ def main(unused_argv):
 
   #replace data
   a = 2
-  for i in range(a):
-      datasets[0].strokes[i] = -100;
-  for j in range(4):
-      print(datasets[0].strokes[j])
+  #for i in range(a):
+      #datasets[0].strokes[i] = -100;
+  #for j in range(4):
+      #print(datasets[0].strokes[j])
 
 
   retrain_times = 3
