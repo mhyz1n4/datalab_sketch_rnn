@@ -299,7 +299,7 @@ gen_sketch.append(temp)
 
 
 
-'''
+
 result = generate()
 output = []
 entry = []
@@ -309,7 +309,7 @@ for i in result:
     break;
 print(entry)
 #print(result)
-'''
+
 
 
 

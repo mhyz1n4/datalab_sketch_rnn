@@ -650,7 +650,7 @@ def trainer(model_params, datasets):
   sess = tf.InteractiveSession()
   sess.run(tf.global_variables_initializer())
 
-  print(model_params.values())
+  #print(model_params.values())
 
   #if FLAGS.resume_training:
     #load_checkpoint(sess, FLAGS.log_root)
@@ -685,13 +685,27 @@ def trainer(model_params, datasets):
   dec_lstm = SketchLSTMCell(dec_num_units, dec_input_size, dec_lstm_W_xh, dec_lstm_W_hh, dec_lstm_bias)
 
   result = generate()
+  #print(result)
   output = []
-  entry = []
   for i in result:
-      print(i)
-      entry.extend(i[0], i[1])
-      break;
-  print(entry)
+      entry = []
+      #print(i)
+      if i[2] != 0:
+          pen = 0
+      else:
+          if i[3] == 1:
+              pen = i[3]
+          else:
+              pen = i[4]
+      #print(pen)
+      #print(i[2])
+      entry.extend(i[:2])
+      entry.append(pen)
+      output.append(entry)
+
+   #print(entry)
+   print(output)
+
 
 
 
