@@ -446,66 +446,6 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
         summary_writer.flush()
 
 
-def trainer(model_params, datasets):
-  """Train a sketch-rnn model."""
-
-  train_set = datasets[0]
-  valid_set = datasets[1]
-  test_set = datasets[2]
-  model_params = datasets[3]
-  eval_model_params = datasets[4]
-
-  reset_graph()
-  model = sketch_rnn_model.Model(model_params)
-  eval_model = sketch_rnn_model.Model(eval_model_params, reuse=True)
-
-  sess = tf.InteractiveSession()
-  sess.run(tf.global_variables_initializer())
-
-  print(model_params.values())
-
-  #if FLAGS.resume_training:
-    #load_checkpoint(sess, FLAGS.log_root)
-
-  # Write config file to json file.
-  #tf.gfile.MakeDirs(FLAGS.log_root)
-  #with tf.gfile.Open(
-      #os.path.join(FLAGS.log_root, 'model_config.json'), 'w') as f:
-    #json.dump(model_params.values(), f, indent=True)
-
-  train(sess, model, eval_model, train_set, valid_set, test_set)
-
-
-  output_w_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_w:0"][0].eval()
-  output_b_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_b:0"][0].eval()
-  lstm_W_xh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/W_xh:0"][0].eval()
-  lstm_W_hh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/W_hh:0"][0].eval()
-  lstm_bias_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/bias:0"][0].eval()
-  print(output_w_.shape())
-  print(output_b_.shape())
-  print(lstm_W_xh_.shape())
-  print(lstm_W_hh_.shape())
-  print(lstm_bias_.shape())
-
-  dec_output_w = output_w_;
-  dec_output_b = output_b_;
-  dec_lstm_W_xh = lstm_W_xh_;
-  dec_lstm_W_hh = lstm_W_hh_;
-  dec_lstm_bias = lstm_bias_;
-  dec_num_units = dec_lstm_W_hh.shape[0];
-  dec_input_size = dec_lstm_W_xh.shape[0];
-  dec_lstm = SketchLSTMCell(dec_num_units, dec_input_size, dec_lstm_W_xh, dec_lstm_W_hh, dec_lstm_bias)
-
-  result = generate()
-  output = []
-  entry = []
-  for i in result:
-      print(i)
-      entry.extend(i[0], i[1])
-      break;
-  print(entry)
-
-
 class SketchLSTMCell(object):
 
     def __init__(self, num_units, input_size, Wxh, Whh, bias):
@@ -693,6 +633,65 @@ def get_sketch(sketch):
         prev_pen = [pen_down, pen_up, pen_end]
     return [x_lines,y_lines]
 
+def trainer(model_params, datasets):
+  """Train a sketch-rnn model."""
+
+  train_set = datasets[0]
+  valid_set = datasets[1]
+  test_set = datasets[2]
+  model_params = datasets[3]
+  eval_model_params = datasets[4]
+
+  reset_graph()
+  model = sketch_rnn_model.Model(model_params)
+  eval_model = sketch_rnn_model.Model(eval_model_params, reuse=True)
+  sample_model = sketch_rnn_model.Model(sample_hps_model, reuse=True)
+
+  sess = tf.InteractiveSession()
+  sess.run(tf.global_variables_initializer())
+
+  print(model_params.values())
+
+  #if FLAGS.resume_training:
+    #load_checkpoint(sess, FLAGS.log_root)
+
+  # Write config file to json file.
+  #tf.gfile.MakeDirs(FLAGS.log_root)
+  #with tf.gfile.Open(
+      #os.path.join(FLAGS.log_root, 'model_config.json'), 'w') as f:
+    #json.dump(model_params.values(), f, indent=True)
+
+  train(sess, model, eval_model, train_set, valid_set, test_set)
+
+
+  output_w_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_w:0"][0].eval()
+  output_b_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_b:0"][0].eval()
+  lstm_W_xh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/W_xh:0"][0].eval()
+  lstm_W_hh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/W_hh:0"][0].eval()
+  lstm_bias_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/bias:0"][0].eval()
+  print(output_w_.shape())
+  print(output_b_.shape())
+  print(lstm_W_xh_.shape())
+  print(lstm_W_hh_.shape())
+  print(lstm_bias_.shape())
+
+  dec_output_w = output_w_;
+  dec_output_b = output_b_;
+  dec_lstm_W_xh = lstm_W_xh_;
+  dec_lstm_W_hh = lstm_W_hh_;
+  dec_lstm_bias = lstm_bias_;
+  dec_num_units = dec_lstm_W_hh.shape[0];
+  dec_input_size = dec_lstm_W_xh.shape[0];
+  dec_lstm = SketchLSTMCell(dec_num_units, dec_input_size, dec_lstm_W_xh, dec_lstm_W_hh, dec_lstm_bias)
+
+  result = generate()
+  output = []
+  entry = []
+  for i in result:
+      print(i)
+      entry.extend(i[0], i[1])
+      break;
+  print(entry)
 
 
 

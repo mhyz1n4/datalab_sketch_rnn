@@ -93,17 +93,37 @@ model_dir = '/Users/mhy/Desktop/data lab/magenta/magenta/models/sketch_rnn/test_
 
 # construct the sketch-rnn model here:
 reset_graph()
+print("=============== hps_model =================")
+print(hps_model)
+print("=============== hps_model =================")
+print("=============== eval_hps_model =================")
+print(eval_hps_model)
+print("=============== eval_hps_model =================")
+print("=============== sample_hps_model =================")
+print(sample_hps_model)
+print("=============== sample_hps_model =================")
 model = Model(hps_model)
 eval_model = Model(eval_hps_model, reuse=True)
 sample_model = Model(sample_hps_model, reuse=True)
+
+print("\n\n\n\n\n")
+print("+++++++++++++++ ____model____ +++++++++++++++++")
+print(model)
+print("+++++++++++++++ eval_____model ++++++++++++++++++")
+print("+++++++++++++++ eval____model +++++++++++++++++")
+print(eval_model)
+print("+++++++++++++++ sample_____model ++++++++++++++++++")
+print("+++++++++++++++ sample____model +++++++++++++++++")
+print(sample_model)
+print("+++++++++++++++ sample_____model ++++++++++++++++++")
 
 sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
 
 # loads the weights from checkpoint into our model
 load_checkpoint(sess, model_dir)
-#v = tf.trainable_variables()
-#x = sess.run(v)
+v = tf.trainable_variables()
+x = sess.run(v)
 output_w_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_w:0"][0].eval()
 output_b_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_b:0"][0].eval()
 lstm_W_xh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/W_xh:0"][0].eval()
@@ -276,6 +296,10 @@ print(gen_sketch)
 temp = get_sketch()
 gen_sketch.append(temp)
 '''
+
+
+
+'''
 result = generate()
 output = []
 entry = []
@@ -285,6 +309,10 @@ for i in result:
     break;
 print(entry)
 #print(result)
+'''
+
+
+
 
 '''
 for k in gen_sketch:
