@@ -47,10 +47,11 @@ class SketchLSTMCell(object):
         self.forget_bias = 1.0;
         self.Wfull=np.transpose(np.concatenate((np.transpose(Wxh), np.transpose(Whh)),axis=1))
 
-    def get_pdf(self,s):
+    def get_pdf(self,s, dec_output_w_):
         h = s[0];
         NOUT = N_mixture;
-        z = np.dot(h, dec_output_w) + dec_output_b;
+        #print(dec_output_w)
+        z = np.dot(h, dec_output_w_) + dec_output_b;
         z_pen_logits = z[0:3];
         z_pi = z[3+NOUT*0:3+NOUT*1];
         z_mu1 = z[3+NOUT*1:3+NOUT*2];
@@ -130,11 +131,18 @@ sess.run(tf.global_variables_initializer())
 load_checkpoint(sess, model_dir)
 v = tf.trainable_variables()
 x = sess.run(v)
+
 output_w_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_w:0"][0].eval()
 output_b_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_b:0"][0].eval()
 lstm_W_xh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/W_xh:0"][0].eval()
 lstm_W_hh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/W_hh:0"][0].eval()
 lstm_bias_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/bias:0"][0].eval()
+
+#print(type(output_w_))
+#print(type(output_b_))
+#print(type(lstm_W_xh_))
+#print(type(lstm_W_hh_))
+#print(type(lstm_bias_))
 
 dec_output_w = output_w_;
 dec_output_b = output_b_;
@@ -143,6 +151,16 @@ dec_lstm_W_hh = lstm_W_hh_;
 dec_lstm_bias = lstm_bias_;
 dec_num_units = dec_lstm_W_hh.shape[0];
 dec_input_size = dec_lstm_W_xh.shape[0];
+
+print("===============")
+#print(dec_output_w.shape)
+#print(dec_output_b.shape)
+#print(dec_lstm_W_xh.shape)
+#print(dec_lstm_W_hh.shape)
+#print(dec_lstm_bias.shape)
+#print(dec_output_w)
+print("===============")
+
 dec_lstm = SketchLSTMCell(dec_num_units, dec_input_size, dec_lstm_W_xh, dec_lstm_W_hh, dec_lstm_bias)
 
 N_mixture = 20
@@ -223,7 +241,7 @@ def birandn(mu1, mu2, std1, std2, rho):
     y = std2*z2 + mu2;
     return [x, y];
 
-def generate(temperature = None, softmax_temperature = None):
+def generate(dec_output_w, temperature = None, softmax_temperature = None):
     temp=0.25;
     if temperature is not None:
         temp = temperature;
@@ -240,7 +258,7 @@ def generate(temperature = None, softmax_temperature = None):
     for i in range(max_seq_len):
         lstm_input = x;
         rnn_state = dec_lstm(lstm_input, h, c);
-        pdf = dec_lstm.get_pdf(rnn_state)
+        pdf = dec_lstm.get_pdf(rnn_state, dec_output_w)
         [dx, dy, pen_down, pen_up, pen_end] = sample(pdf, temp, softmax_temp);
         result.append([dx, dy, pen_down, pen_up, pen_end]);
         if pen_end == 1:
@@ -289,14 +307,15 @@ def get_sketch(sketch):
 
 
 #modify this to generate
-num_of_boats = 0
-for i in range(num_of_boats)
-    result = generate()
+num_of_boats = 1
+for i in range(num_of_boats):
+    result = generate(dec_output_w)
+    print(result)
     output = []
     entry = []
-    for i in result:
-        print(i)
-        
+    #for i in result:
+        #print(0)
+
         #break;
 
 

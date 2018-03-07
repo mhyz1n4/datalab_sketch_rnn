@@ -39,7 +39,7 @@ from magenta.models.sketch_rnn import utils
 #from magenta.models.sketch_rnn.sketch_rnn_train import *
 #from magenta.models.sketch_rnn.model import *
 #from magenta.models.sketch_rnn.utils import *
-#from magenta.models.sketch_rnn.rnn import *
+from magenta.models.sketch_rnn.rnn import *
 
 
 
@@ -299,7 +299,7 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
 #
 #
 
-  for _ in range(1):
+  for _ in range(1000):
 
     step = sess.run(model.global_step)
 
@@ -458,10 +458,10 @@ class SketchLSTMCell(object):
         self.forget_bias = 1.0;
         self.Wfull=np.transpose(np.concatenate((np.transpose(Wxh), np.transpose(Whh)),axis=1))
 
-    def get_pdf(self,s):
+    def get_pdf(self,s, dec_output_w_, dec_output_b_):
         h = s[0];
         NOUT = N_mixture;
-        z = np.dot(h, dec_output_w) + dec_output_b;
+        z = np.dot(h, dec_output_w_) + dec_output_b_;
         z_pen_logits = z[0:3];
         z_pi = z[3+NOUT*0:3+NOUT*1];
         z_mu1 = z[3+NOUT*1:3+NOUT*2];
@@ -570,7 +570,7 @@ def birandn(mu1, mu2, std1, std2, rho):
     y = std2*z2 + mu2;
     return [x, y];
 
-def generate(temperature = None, softmax_temperature = None):
+def generate(dec_lstm, dec_output_w ,dec_output_b, temperature = None, softmax_temperature = None):
     temp=0.25;
     if temperature is not None:
         temp = temperature;
@@ -587,7 +587,7 @@ def generate(temperature = None, softmax_temperature = None):
     for i in range(max_seq_len):
         lstm_input = x;
         rnn_state = dec_lstm(lstm_input, h, c);
-        pdf = dec_lstm.get_pdf(rnn_state)
+        pdf = dec_lstm.get_pdf(rnn_state, dec_output_w, dec_output_b)
         [dx, dy, pen_down, pen_up, pen_end] = sample(pdf, temp, softmax_temp);
         result.append([dx, dy, pen_down, pen_up, pen_end]);
         if pen_end == 1:
@@ -646,35 +646,20 @@ def trainer(model_params, datasets):
   reset_graph()
   model = sketch_rnn_model.Model(model_params)
   eval_model = sketch_rnn_model.Model(eval_model_params, reuse=True)
-  sample_model = sketch_rnn_model.Model(sample_hps_model, reuse=True)
+  sample_params = sketch_rnn_model.copy_hparams(eval_model_params)
+  sample_params.max_seq_len = 1
+  sample_model = sketch_rnn_model.Model(sample_params, reuse=True)
 
   sess = tf.InteractiveSession()
   sess.run(tf.global_variables_initializer())
 
-  #print(model_params.values())
-
-  #if FLAGS.resume_training:
-    #load_checkpoint(sess, FLAGS.log_root)
-
-  # Write config file to json file.
-  #tf.gfile.MakeDirs(FLAGS.log_root)
-  #with tf.gfile.Open(
-      #os.path.join(FLAGS.log_root, 'model_config.json'), 'w') as f:
-    #json.dump(model_params.values(), f, indent=True)
-
   train(sess, model, eval_model, train_set, valid_set, test_set)
-
 
   output_w_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_w:0"][0].eval()
   output_b_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_b:0"][0].eval()
   lstm_W_xh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/W_xh:0"][0].eval()
   lstm_W_hh_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/W_hh:0"][0].eval()
   lstm_bias_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/LSTMCell/bias:0"][0].eval()
-  print(output_w_.shape())
-  print(output_b_.shape())
-  print(lstm_W_xh_.shape())
-  print(lstm_W_hh_.shape())
-  print(lstm_bias_.shape())
 
   dec_output_w = output_w_;
   dec_output_b = output_b_;
@@ -685,8 +670,9 @@ def trainer(model_params, datasets):
   dec_input_size = dec_lstm_W_xh.shape[0];
   dec_lstm = SketchLSTMCell(dec_num_units, dec_input_size, dec_lstm_W_xh, dec_lstm_W_hh, dec_lstm_bias)
 
-  result = generate()
-  #print(result)
+  result = generate(dec_lstm, dec_output_w, dec_output_b)
+
+  print(result)
   output = []
   for i in result:
       entry = []
@@ -703,7 +689,7 @@ def trainer(model_params, datasets):
       entry.extend(i[:2])
       entry.append(pen)
       output.append(entry)
-  print(output)
+  #print(output)
 
 
 
@@ -742,10 +728,10 @@ def main(unused_argv):
       #print(datasets[0].strokes[j])
 
 
-  retrain_times = 1
-  for i in range(retrain_times):
+  #retrain_times = 1
+  #for i in range(retrain_times):
 
-      trainer(model_params, datasets)
+  trainer(model_params, datasets)
 
 
 def console_entry_point():
