@@ -36,10 +36,10 @@ import uuid
 from magenta.models.sketch_rnn import model as sketch_rnn_model
 from magenta.models.sketch_rnn import utils
 
-from magenta.models.sketch_rnn.sketch_rnn_train import *
-from magenta.models.sketch_rnn.model import *
-from magenta.models.sketch_rnn.utils import *
-from magenta.models.sketch_rnn.rnn import *
+#from magenta.models.sketch_rnn.sketch_rnn_train import *
+#from magenta.models.sketch_rnn.model import *
+#from magenta.models.sketch_rnn.utils import *
+#from magenta.models.sketch_rnn.rnn import *
 
 
 
