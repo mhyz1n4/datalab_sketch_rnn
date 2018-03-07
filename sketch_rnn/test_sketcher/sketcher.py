@@ -93,6 +93,8 @@ model_dir = '/Users/mhy/Desktop/data lab/magenta/magenta/models/sketch_rnn/test_
 
 # construct the sketch-rnn model here:
 reset_graph()
+
+'''
 print("=============== hps_model =================")
 print(hps_model)
 print("=============== hps_model =================")
@@ -102,10 +104,13 @@ print("=============== eval_hps_model =================")
 print("=============== sample_hps_model =================")
 print(sample_hps_model)
 print("=============== sample_hps_model =================")
+'''
+
 model = Model(hps_model)
 eval_model = Model(eval_hps_model, reuse=True)
 sample_model = Model(sample_hps_model, reuse=True)
 
+'''
 print("\n\n\n\n\n")
 print("+++++++++++++++ ____model____ +++++++++++++++++")
 print(model)
@@ -116,6 +121,7 @@ print("+++++++++++++++ sample_____model ++++++++++++++++++")
 print("+++++++++++++++ sample____model +++++++++++++++++")
 print(sample_model)
 print("+++++++++++++++ sample_____model ++++++++++++++++++")
+'''
 
 sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
@@ -282,33 +288,17 @@ def get_sketch(sketch):
     return [x_lines,y_lines]
 
 
+#modify this to generate
+num_of_boats = 0
+for i in range(num_of_boats)
+    result = generate()
+    output = []
+    entry = []
+    for i in result:
+        print(i)
+        
+        #break;
 
-#img = np.ones((1000,1000,3), np.uint8)
-#img = cv2.imread('dave.jpg')
-#gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-
-'''
-gen_sketch=[]
-for i in range(10):
-    #temp = get_sketch()
-    #gen_sketch.append(temp)
-print(gen_sketch)
-temp = get_sketch()
-gen_sketch.append(temp)
-'''
-
-
-
-
-result = generate()
-output = []
-entry = []
-for i in result:
-    print(i)
-    entry.extend(i[0], i[1])
-    break;
-print(entry)
-#print(result)
 
 
 

@@ -22,6 +22,7 @@ import os
 import time
 import urllib
 import zipfile
+from scipy.special import expit
 
 # internal imports
 
@@ -702,9 +703,7 @@ def trainer(model_params, datasets):
       entry.extend(i[:2])
       entry.append(pen)
       output.append(entry)
-
-   #print(entry)
-   print(output)
+  print(output)
 
 
 
