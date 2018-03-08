@@ -47,11 +47,11 @@ class SketchLSTMCell(object):
         self.forget_bias = 1.0;
         self.Wfull=np.transpose(np.concatenate((np.transpose(Wxh), np.transpose(Whh)),axis=1))
 
-    def get_pdf(self,s, dec_output_w_):
+    def get_pdf(self,s, dec_output_w_, dec_output_b_):
         h = s[0];
         NOUT = N_mixture;
         #print(dec_output_w)
-        z = np.dot(h, dec_output_w_) + dec_output_b;
+        z = np.dot(h, dec_output_w_) + dec_output_b_;
         z_pen_logits = z[0:3];
         z_pi = z[3+NOUT*0:3+NOUT*1];
         z_mu1 = z[3+NOUT*1:3+NOUT*2];
@@ -241,14 +241,14 @@ def birandn(mu1, mu2, std1, std2, rho):
     y = std2*z2 + mu2;
     return [x, y];
 
-def generate(dec_output_w, temperature = None, softmax_temperature = None):
+def generate(dec_lstm_, dec_output_w_, dec_output_b_, temperature = None, softmax_temperature = None):
     temp=0.25;
     if temperature is not None:
         temp = temperature;
     softmax_temp = 0.5+temp*0.5;
     if softmax_temperature is not None:
         softmax_temp = softmax_temperature
-    init_state = dec_lstm.zero_state()
+    init_state = dec_lstm_.zero_state()
     h = init_state[0];
     c = init_state[1];
 
@@ -257,8 +257,8 @@ def generate(dec_output_w, temperature = None, softmax_temperature = None):
     max_seq_len = 125
     for i in range(max_seq_len):
         lstm_input = x;
-        rnn_state = dec_lstm(lstm_input, h, c);
-        pdf = dec_lstm.get_pdf(rnn_state, dec_output_w)
+        rnn_state = dec_lstm_(lstm_input, h, c);
+        pdf = dec_lstm.get_pdf(rnn_state, dec_output_w_, dec_output_b_)
         [dx, dy, pen_down, pen_up, pen_end] = sample(pdf, temp, softmax_temp);
         result.append([dx, dy, pen_down, pen_up, pen_end]);
         if pen_end == 1:
@@ -309,7 +309,7 @@ def get_sketch(sketch):
 #modify this to generate
 num_of_boats = 1
 for i in range(num_of_boats):
-    result = generate(dec_output_w)
+    result = generate(dec_lstm, dec_output_w, dec_output_b)
     print(result)
     output = []
     entry = []
