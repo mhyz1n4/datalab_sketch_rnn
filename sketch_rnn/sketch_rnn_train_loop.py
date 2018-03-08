@@ -670,7 +670,7 @@ def trainer(model_params, datasets):
   dec_input_size = dec_lstm_W_xh.shape[0];
   dec_lstm = SketchLSTMCell(dec_num_units, dec_input_size, dec_lstm_W_xh, dec_lstm_W_hh, dec_lstm_bias)
 
-  num_of_boats = 2
+  num_of_boats = 10000
   count = 0
   train_result = []
   for j in range(num_of_boats):
