@@ -22,6 +22,7 @@ import os
 import time
 import urllib
 import zipfile
+import requests
 from scipy.special import expit
 
 # internal imports
@@ -298,8 +299,7 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
 #
 #
 #
-
-  for _ in range(2000):
+  for _ in range(1):
 
     step = sess.run(model.global_step)
 
@@ -670,28 +670,40 @@ def trainer(model_params, datasets):
   dec_input_size = dec_lstm_W_xh.shape[0];
   dec_lstm = SketchLSTMCell(dec_num_units, dec_input_size, dec_lstm_W_xh, dec_lstm_W_hh, dec_lstm_bias)
 
-  result = generate(dec_lstm, dec_output_w, dec_output_b)
-
-  print(result)
-  output = []
-  for i in result:
-      entry = []
-      #print(i)
-      if i[2] != 0:
-          pen = 0
-      else:
-          if i[3] == 1:
-              pen = i[3]
+  num_of_boats = 2
+  count = 0
+  train_result = []
+  for j in range(num_of_boats):
+      output = []
+      result = generate(dec_lstm, dec_output_w, dec_output_b)
+      total = len(result)
+      for i in result:
+          entry = []
+          if i[2] != 0:
+              pen = 0
           else:
-              pen = i[4]
-      #print(pen)
-      #print(i[2])
-      entry.extend(i[:2])
-      entry.append(pen)
-      output.append(entry)
-  #print(output)
+              if i[3] == 1:
+                  pen = i[3]
+              else:
+                  pen = i[4]
+          if count == total -2:
+              pen = 0
+          entry.extend(i[:2])
+          entry.append(pen)
+          output.append(entry)
+          count += 1
+      print("++++++++++++print_sketch+++++++++++")
+      print(j)
+      print(output)
+      print("+++++++++++++++++++++++++++++++++++")
+      train_result.append(output)
+  print("==========print_train_result===========")
+  print(train_result)
+  return train_result
+  print("===================================")
 
-
+def generate_sketches(num_of_boats, dec_lstm,dec_output_w, dec_output_b):
+    return num_of_boats
 
 
 def main(unused_argv):
@@ -701,7 +713,6 @@ def main(unused_argv):
   if FLAGS.hparams:
       model_params.parse(FLAGS.hparams)
 
-
   np.set_printoptions(precision=8, edgeitems=6, linewidth=200, suppress=True)
 
   tf.logging.info('sketch-rnn')
@@ -710,7 +721,6 @@ def main(unused_argv):
   for key, val in six.iteritems(model_params.values()):
       tf.logging.info('%s = %s', key, str(val))
   tf.logging.info('Loading data files.')
-  #print(model_params)
   datasets = load_dataset(FLAGS.data_dir, model_params)
 
   #parse train, valid and
@@ -718,20 +728,41 @@ def main(unused_argv):
   valid = datasets[1].strokes
   test = datasets[2].strokes
   print("\n\ntrain length = %d, valid_length = %d, test length = %d\n\n" % (len(train), len(valid), len(test)))
-
+  total_data_size = len(train) + len(valid) + len(test)
 
   #replace data
-  a = 2
   #for i in range(a):
       #datasets[0].strokes[i] = -100;
   #for j in range(4):
       #print(datasets[0].strokes[j])
 
+  retrain_times = 2
+  for i in range(retrain_times):
+      result = []
+      result = trainer(model_params, datasets)
+      #num_of_result = len(result)
 
-  #retrain_times = 1
-  #for i in range(retrain_times):
+      #  hostname = "54.82.94.146"
+      #  port = 80
+      #  check = 0
+      # for i in result:
+      #     x_array,y_array = get_sketch(i)
+      #     #print(x_array)
+      #     #rint(y_array)
+      #     r = requests.post("http://{}:{}/data".format(hostname,port),
+      #                     data = json.dumps({"data":{"x_data":x_array,"y_data":y_array,"id":i,"check":check}}))
 
-  trainer(model_params, datasets)
+      print("#########final_result###########")
+      print(result)
+      print("result number [0]")
+      print(result[0])
+      print("#########final_result###########")
+
+      IP = ""
+
+      datasets[0].strokes[i] = result[0];
+      for j in range(4):
+          print(datasets[0].strokes[j])
 
 
 def console_entry_point():
