@@ -399,7 +399,7 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
       if valid_cost < best_valid_cost:
         best_valid_cost = valid_cost
 
-        save_model(sess, FLAGS.log_root, step)
+        #save_model(sess, FLAGS.log_root, step)
 
         end = time.time()
         time_taken_save = end - start
