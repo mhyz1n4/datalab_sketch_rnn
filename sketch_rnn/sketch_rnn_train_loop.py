@@ -299,7 +299,7 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
 #
 #
 
-  for _ in range(1000):
+  for _ in range(100):
 
     step = sess.run(model.global_step)
 
