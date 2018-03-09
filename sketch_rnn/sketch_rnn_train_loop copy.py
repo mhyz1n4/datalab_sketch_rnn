@@ -299,151 +299,153 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
 #
 #
 #
-  for _ in range(1):
-    step = sess.run(model.global_step)
+  for _ in range(1000):
+    for d in ['/dvice:GPU:1', '/device:GPU:2']:
+        with tf.device(d):
+            step = sess.run(model.global_step)
 
-    curr_learning_rate = ((hps.learning_rate - hps.min_learning_rate) *
-                          (hps.decay_rate)**step + hps.min_learning_rate)
-    curr_kl_weight = (hps.kl_weight - (hps.kl_weight - hps.kl_weight_start) *
-                      (hps.kl_decay_rate)**step)
+            curr_learning_rate = ((hps.learning_rate - hps.min_learning_rate) *
+                                  (hps.decay_rate)**step + hps.min_learning_rate)
+            curr_kl_weight = (hps.kl_weight - (hps.kl_weight - hps.kl_weight_start) *
+                              (hps.kl_decay_rate)**step)
 
-    _, x, s = train_set.random_batch()
-    feed = {
-        model.input_data: x,
-        model.sequence_lengths: s,
-        model.lr: curr_learning_rate,
-        model.kl_weight: curr_kl_weight
-    }
+            _, x, s = train_set.random_batch()
+            feed = {
+                model.input_data: x,
+                model.sequence_lengths: s,
+                model.lr: curr_learning_rate,
+                model.kl_weight: curr_kl_weight
+            }
 
-    (train_cost, r_cost, kl_cost, _, train_step, _) = sess.run([
-        model.cost, model.r_cost, model.kl_cost, model.final_state,
-        model.global_step, model.train_op
-    ], feed)
+            (train_cost, r_cost, kl_cost, _, train_step, _) = sess.run([
+                model.cost, model.r_cost, model.kl_cost, model.final_state,
+                model.global_step, model.train_op
+            ], feed)
 
-    if step % 20 == 0 and step > 0:
+            if step % 20 == 0 and step > 0:
 
-      end = time.time()
-      time_taken = end - start
+              end = time.time()
+              time_taken = end - start
 
-      cost_summ = tf.summary.Summary()
-      cost_summ.value.add(tag='Train_Cost', simple_value=float(train_cost))
-      reconstr_summ = tf.summary.Summary()
-      reconstr_summ.value.add(
-          tag='Train_Reconstr_Cost', simple_value=float(r_cost))
-      kl_summ = tf.summary.Summary()
-      kl_summ.value.add(tag='Train_KL_Cost', simple_value=float(kl_cost))
-      lr_summ = tf.summary.Summary()
-      lr_summ.value.add(
-          tag='Learning_Rate', simple_value=float(curr_learning_rate))
-      kl_weight_summ = tf.summary.Summary()
-      kl_weight_summ.value.add(
-          tag='KL_Weight', simple_value=float(curr_kl_weight))
-      time_summ = tf.summary.Summary()
-      time_summ.value.add(
-          tag='Time_Taken_Train', simple_value=float(time_taken))
+              cost_summ = tf.summary.Summary()
+              cost_summ.value.add(tag='Train_Cost', simple_value=float(train_cost))
+              reconstr_summ = tf.summary.Summary()
+              reconstr_summ.value.add(
+                  tag='Train_Reconstr_Cost', simple_value=float(r_cost))
+              kl_summ = tf.summary.Summary()
+              kl_summ.value.add(tag='Train_KL_Cost', simple_value=float(kl_cost))
+              lr_summ = tf.summary.Summary()
+              lr_summ.value.add(
+                  tag='Learning_Rate', simple_value=float(curr_learning_rate))
+              kl_weight_summ = tf.summary.Summary()
+              kl_weight_summ.value.add(
+                  tag='KL_Weight', simple_value=float(curr_kl_weight))
+              time_summ = tf.summary.Summary()
+              time_summ.value.add(
+                  tag='Time_Taken_Train', simple_value=float(time_taken))
 
-      output_format = ('step: %d, lr: %.6f, klw: %0.4f, cost: %.4f, '
-                       'recon: %.4f, kl: %.4f, train_time_taken: %.4f')
-      output_values = (step, curr_learning_rate, curr_kl_weight, train_cost,
-                       r_cost, kl_cost, time_taken)
-      output_log = output_format % output_values
+              output_format = ('step: %d, lr: %.6f, klw: %0.4f, cost: %.4f, '
+                               'recon: %.4f, kl: %.4f, train_time_taken: %.4f')
+              output_values = (step, curr_learning_rate, curr_kl_weight, train_cost,
+                               r_cost, kl_cost, time_taken)
+              output_log = output_format % output_values
 
-      tf.logging.info(output_log)
+              tf.logging.info(output_log)
 
-      summary_writer.add_summary(cost_summ, train_step)
-      summary_writer.add_summary(reconstr_summ, train_step)
-      summary_writer.add_summary(kl_summ, train_step)
-      summary_writer.add_summary(lr_summ, train_step)
-      summary_writer.add_summary(kl_weight_summ, train_step)
-      summary_writer.add_summary(time_summ, train_step)
-      summary_writer.flush()
-      start = time.time()
+              summary_writer.add_summary(cost_summ, train_step)
+              summary_writer.add_summary(reconstr_summ, train_step)
+              summary_writer.add_summary(kl_summ, train_step)
+              summary_writer.add_summary(lr_summ, train_step)
+              summary_writer.add_summary(kl_weight_summ, train_step)
+              summary_writer.add_summary(time_summ, train_step)
+              summary_writer.flush()
+              start = time.time()
 
-    if step % hps.save_every == 0 and step > 0:
+            if step % hps.save_every == 0 and step > 0:
 
-      (valid_cost, valid_r_cost, valid_kl_cost) = evaluate_model(
-          sess, eval_model, valid_set)
+              (valid_cost, valid_r_cost, valid_kl_cost) = evaluate_model(
+                  sess, eval_model, valid_set)
 
-      end = time.time()
-      time_taken_valid = end - start
-      start = time.time()
+              end = time.time()
+              time_taken_valid = end - start
+              start = time.time()
 
-      valid_cost_summ = tf.summary.Summary()
-      valid_cost_summ.value.add(
-          tag='Valid_Cost', simple_value=float(valid_cost))
-      valid_reconstr_summ = tf.summary.Summary()
-      valid_reconstr_summ.value.add(
-          tag='Valid_Reconstr_Cost', simple_value=float(valid_r_cost))
-      valid_kl_summ = tf.summary.Summary()
-      valid_kl_summ.value.add(
-          tag='Valid_KL_Cost', simple_value=float(valid_kl_cost))
-      valid_time_summ = tf.summary.Summary()
-      valid_time_summ.value.add(
-          tag='Time_Taken_Valid', simple_value=float(time_taken_valid))
+              valid_cost_summ = tf.summary.Summary()
+              valid_cost_summ.value.add(
+                  tag='Valid_Cost', simple_value=float(valid_cost))
+              valid_reconstr_summ = tf.summary.Summary()
+              valid_reconstr_summ.value.add(
+                  tag='Valid_Reconstr_Cost', simple_value=float(valid_r_cost))
+              valid_kl_summ = tf.summary.Summary()
+              valid_kl_summ.value.add(
+                  tag='Valid_KL_Cost', simple_value=float(valid_kl_cost))
+              valid_time_summ = tf.summary.Summary()
+              valid_time_summ.value.add(
+                  tag='Time_Taken_Valid', simple_value=float(time_taken_valid))
 
-      output_format = ('best_valid_cost: %0.4f, valid_cost: %.4f, valid_recon: '
-                       '%.4f, valid_kl: %.4f, valid_time_taken: %.4f')
-      output_values = (min(best_valid_cost, valid_cost), valid_cost,
-                       valid_r_cost, valid_kl_cost, time_taken_valid)
-      output_log = output_format % output_values
+              output_format = ('best_valid_cost: %0.4f, valid_cost: %.4f, valid_recon: '
+                               '%.4f, valid_kl: %.4f, valid_time_taken: %.4f')
+              output_values = (min(best_valid_cost, valid_cost), valid_cost,
+                               valid_r_cost, valid_kl_cost, time_taken_valid)
+              output_log = output_format % output_values
 
-      tf.logging.info(output_log)
+              tf.logging.info(output_log)
 
-      summary_writer.add_summary(valid_cost_summ, train_step)
-      summary_writer.add_summary(valid_reconstr_summ, train_step)
-      summary_writer.add_summary(valid_kl_summ, train_step)
-      summary_writer.add_summary(valid_time_summ, train_step)
-      summary_writer.flush()
+              summary_writer.add_summary(valid_cost_summ, train_step)
+              summary_writer.add_summary(valid_reconstr_summ, train_step)
+              summary_writer.add_summary(valid_kl_summ, train_step)
+              summary_writer.add_summary(valid_time_summ, train_step)
+              summary_writer.flush()
 
-      if valid_cost < best_valid_cost:
-        best_valid_cost = valid_cost
+              if valid_cost < best_valid_cost:
+                best_valid_cost = valid_cost
 
-        #save_model(sess, FLAGS.log_root, step)
+                #save_model(sess, FLAGS.log_root, step)
 
-        end = time.time()
-        time_taken_save = end - start
-        start = time.time()
+                end = time.time()
+                time_taken_save = end - start
+                start = time.time()
 
-        tf.logging.info('time_taken_save %4.4f.', time_taken_save)
+                tf.logging.info('time_taken_save %4.4f.', time_taken_save)
 
-        best_valid_cost_summ = tf.summary.Summary()
-        best_valid_cost_summ.value.add(
-            tag='Best_Valid_Cost', simple_value=float(best_valid_cost))
+                best_valid_cost_summ = tf.summary.Summary()
+                best_valid_cost_summ.value.add(
+                    tag='Best_Valid_Cost', simple_value=float(best_valid_cost))
 
-        summary_writer.add_summary(best_valid_cost_summ, train_step)
-        summary_writer.flush()
+                summary_writer.add_summary(best_valid_cost_summ, train_step)
+                summary_writer.flush()
 
-        (eval_cost, eval_r_cost, eval_kl_cost) = evaluate_model(
-            sess, eval_model, test_set)
+                (eval_cost, eval_r_cost, eval_kl_cost) = evaluate_model(
+                    sess, eval_model, test_set)
 
-        end = time.time()
-        time_taken_eval = end - start
-        start = time.time()
+                end = time.time()
+                time_taken_eval = end - start
+                start = time.time()
 
-        eval_cost_summ = tf.summary.Summary()
-        eval_cost_summ.value.add(tag='Eval_Cost', simple_value=float(eval_cost))
-        eval_reconstr_summ = tf.summary.Summary()
-        eval_reconstr_summ.value.add(
-            tag='Eval_Reconstr_Cost', simple_value=float(eval_r_cost))
-        eval_kl_summ = tf.summary.Summary()
-        eval_kl_summ.value.add(
-            tag='Eval_KL_Cost', simple_value=float(eval_kl_cost))
-        eval_time_summ = tf.summary.Summary()
-        eval_time_summ.value.add(
-            tag='Time_Taken_Eval', simple_value=float(time_taken_eval))
+                eval_cost_summ = tf.summary.Summary()
+                eval_cost_summ.value.add(tag='Eval_Cost', simple_value=float(eval_cost))
+                eval_reconstr_summ = tf.summary.Summary()
+                eval_reconstr_summ.value.add(
+                    tag='Eval_Reconstr_Cost', simple_value=float(eval_r_cost))
+                eval_kl_summ = tf.summary.Summary()
+                eval_kl_summ.value.add(
+                    tag='Eval_KL_Cost', simple_value=float(eval_kl_cost))
+                eval_time_summ = tf.summary.Summary()
+                eval_time_summ.value.add(
+                    tag='Time_Taken_Eval', simple_value=float(time_taken_eval))
 
-        output_format = ('eval_cost: %.4f, eval_recon: %.4f, '
-                         'eval_kl: %.4f, eval_time_taken: %.4f')
-        output_values = (eval_cost, eval_r_cost, eval_kl_cost, time_taken_eval)
-        output_log = output_format % output_values
+                output_format = ('eval_cost: %.4f, eval_recon: %.4f, '
+                                 'eval_kl: %.4f, eval_time_taken: %.4f')
+                output_values = (eval_cost, eval_r_cost, eval_kl_cost, time_taken_eval)
+                output_log = output_format % output_values
 
-        tf.logging.info(output_log)
+                tf.logging.info(output_log)
 
-        summary_writer.add_summary(eval_cost_summ, train_step)
-        summary_writer.add_summary(eval_reconstr_summ, train_step)
-        summary_writer.add_summary(eval_kl_summ, train_step)
-        summary_writer.add_summary(eval_time_summ, train_step)
-        summary_writer.flush()
+                summary_writer.add_summary(eval_cost_summ, train_step)
+                summary_writer.add_summary(eval_reconstr_summ, train_step)
+                summary_writer.add_summary(eval_kl_summ, train_step)
+                summary_writer.add_summary(eval_time_summ, train_step)
+                summary_writer.flush()
 
 
 class SketchLSTMCell(object):
