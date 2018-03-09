@@ -307,7 +307,7 @@ def get_sketch(sketch):
     return [x_lines,y_lines]
 
 
-num_of_boats = 10000
+num_of_boats = 10
 count = 0
 train_result = []
 for j in range(num_of_boats):
@@ -322,13 +322,6 @@ for j in range(num_of_boats):
     print(x_array)
     #rint(y_array)
     r = requests.post("http://{}:{}/Hdata".format(hostname,port),data = json.dumps({"data":{"x_data":x_array,"y_data":y_array,"id":j,"check":check}}))
-
-
-
-
-
-
-
 
 '''
 for k in gen_sketch:
