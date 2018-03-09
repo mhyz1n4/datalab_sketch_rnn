@@ -699,15 +699,14 @@ def trainer(model_params, datasets):
       train_result.append(output)
   print("==========print_train_result===========")
   print(train_result)
-  return train_result
   print("===================================")
+  return train_result
 
-def generate_sketches(num_of_boats, dec_lstm,dec_output_w, dec_output_b):
-    return num_of_boats
 
+# def generate_sketches(num_of_boats, dec_lstm,dec_output_w, dec_output_b):
+#     return num_of_boats
 
 def main(unused_argv):
-  """Load model params, save config file and start trainer."""
   model_params = sketch_rnn_model.get_default_hparams()
 
   if FLAGS.hparams:
@@ -716,11 +715,11 @@ def main(unused_argv):
   np.set_printoptions(precision=8, edgeitems=6, linewidth=200, suppress=True)
 
   tf.logging.info('sketch-rnn')
-  tf.logging.info('Hyperparams:')
-  print(model_params.values())
-  for key, val in six.iteritems(model_params.values()):
-      tf.logging.info('%s = %s', key, str(val))
-  tf.logging.info('Loading data files.')
+  #tf.logging.info('Hyperparams:')
+  #print(model_params.values())
+  #for key, val in six.iteritems(model_params.values()):
+     # tf.logging.info('%s = %s', key, str(val))
+  #tf.logging.info('Loading data files.')
   datasets = load_dataset(FLAGS.data_dir, model_params)
 
   #parse train, valid and
@@ -729,6 +728,10 @@ def main(unused_argv):
   test = datasets[2].strokes
   print("\n\ntrain length = %d, valid_length = %d, test length = %d\n\n" % (len(train), len(valid), len(test)))
   total_data_size = len(train) + len(valid) + len(test)
+
+  #train length = 164888, valid_length = 2500, test length = 2500
+  arr = np.arange(total_data_size)
+  np.random.shuffle(arr)
 
   #replace data
   #for i in range(a):

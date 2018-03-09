@@ -88,7 +88,7 @@ class SketchLSTMCell(object):
 #
 
 
-model_dir = '/Users/mhy/Desktop/data lab/magenta/magenta/models/sketch_rnn/test_sketcher/weights-uncon-7500'
+model_dir = '/sketch_rnn_floder/datalab_sketch_rnn/sketch_rnn/test_sketcher/weights-uncon-7500'
 
 [hps_model, eval_hps_model, sample_hps_model] = load_model(model_dir)
 
@@ -306,17 +306,43 @@ def get_sketch(sketch):
     return [x_lines,y_lines]
 
 
-#modify this to generate
-num_of_boats = 1
-for i in range(num_of_boats):
-    result = generate(dec_lstm, dec_output_w, dec_output_b)
-    print(result)
+num_of_boats = 10000
+count = 0
+train_result = []
+for j in range(num_of_boats):
     output = []
-    entry = []
-    #for i in result:
-        #print(0)
+    result = generate(dec_lstm, dec_output_w, dec_output_b)
+    total = len(result)
+    for i in result:
+        entry = []
+        if i[2] != 0:
+            pen = 0
+        else:
+            if i[3] == 1:
+                pen = i[3]
+            else:
+                pen = i[4]
+        if count == total -2:
+            pen = 0
+        entry.extend(i[:2])
+        entry.append(pen)
+        output.append(entry)
+        count += 1
+    print("++++++++++++print_sketch+++++++++++")
+    print(j)
+    print(output)
+    print("+++++++++++++++++++++++++++++++++++")
+    train_result.append(output)
 
-        #break;
+ostname = "54.82.94.146"
+port = 80
+check = 0
+for i in train_result:
+    x_array,y_array = get_sketch(i)
+    #print(x_array)
+    #rint(y_array)
+    r = requests.post("http://{}:{}/data".format(hostname,port),
+                    data = json.dumps({"data":{"x_data":x_array,"y_data":y_array,"id":i,"check":check}}))
 
 
 
