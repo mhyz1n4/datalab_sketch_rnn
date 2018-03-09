@@ -300,7 +300,7 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
 #
 #
   for _ in range(1000):
-    for d in ['/dvice:GPU:1', '/device:GPU:2']:
+    for d in ['/device:GPU:1', '/device:GPU:2']:
         with tf.device(d):
             step = sess.run(model.global_step)
 
