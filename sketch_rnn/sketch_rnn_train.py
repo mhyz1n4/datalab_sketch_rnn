@@ -290,18 +290,22 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
     curr_kl_weight = (hps.kl_weight - (hps.kl_weight - hps.kl_weight_start) *
                       (hps.kl_decay_rate)**step)
 
-    _, x, s = train_set.random_batch()
-    feed = {
-        model.input_data: x,
-        model.sequence_lengths: s,
-        model.lr: curr_learning_rate,
-        model.kl_weight: curr_kl_weight
-    }
 
-    (train_cost, r_cost, kl_cost, _, train_step, _) = sess.run([
-        model.cost, model.r_cost, model.kl_cost, model.final_state,
-        model.global_step, model.train_op
-    ], feed)
+    with tf.device('/device:GPU:6'):
+        _, x, s = train_set.random_batch()
+        feed = {
+            model.input_data: x,
+            model.sequence_lengths: s,
+            model.lr: curr_learning_rate,
+            model.kl_weight: curr_kl_weight
+        }
+        cost = model.cost
+        r_cost = model.r_cost
+        kl_cost = model.kl_cost
+        global_step = model.final_state,model.global_step
+        train_op = model.train_op
+
+    (train_cost, r_cost, kl_cost, _, train_step, _) = sess.run([model.cost, model.r_cost, model.kl_cost, model.final_state,model.global_step, model.train_op], feed)
 
     if step % 20 == 0 and step > 0:
 
