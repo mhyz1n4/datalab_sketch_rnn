@@ -299,7 +299,7 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
 #
 #
 #
-  for _ in range(1):
+  for _ in range(1000):
     step = sess.run(model.global_step)
 
     curr_learning_rate = ((hps.learning_rate - hps.min_learning_rate) *
@@ -320,7 +320,7 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
         model.global_step, model.train_op
     ], feed)
 
-    if step % 20 == 0 and step > 0:
+    if step % 2 == 0 and step > 0:
 
       end = time.time()
       time_taken = end - start
@@ -652,6 +652,7 @@ def trainer(model_params, datasets):
   sess = tf.InteractiveSession()
   sess.run(tf.global_variables_initializer())
 
+
   train(sess, model, eval_model, train_set, valid_set, test_set)
 
   output_w_ = [v for v in tf.trainable_variables() if v.name == "vector_rnn/RNN/output_w:0"][0].eval()
@@ -669,7 +670,7 @@ def trainer(model_params, datasets):
   dec_input_size = dec_lstm_W_xh.shape[0];
   dec_lstm = SketchLSTMCell(dec_num_units, dec_input_size, dec_lstm_W_xh, dec_lstm_W_hh, dec_lstm_bias)
 
-  num_of_boats = 10000
+  num_of_boats = 5
   count = 0
   train_result = []
   for j in range(num_of_boats):

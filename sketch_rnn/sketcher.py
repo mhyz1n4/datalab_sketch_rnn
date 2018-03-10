@@ -2,7 +2,7 @@ import numpy as np
 import json
 import os
 from scipy.special import expit
-#import cv2
+import cv2
 import requests
 
 import time
@@ -306,7 +306,7 @@ def get_sketch(sketch):
         prev_pen = [pen_down, pen_up, pen_end]
     return [x_lines,y_lines]
 
-
+'''
 num_of_boats = 10
 count = 0
 train_result = []
@@ -324,6 +324,7 @@ for j in range(num_of_boats):
     r = requests.post("http://{}:{}/Hdata".format(hostname,port),data = json.dumps({"data":{"x_data":x_array,"y_data":y_array,"id":j,"check":check}}))
 
 '''
+
 for k in gen_sketch:
     x_axis = k[0]
     y_axis = k[1]
@@ -344,7 +345,7 @@ cv2.destroyAllWindows()
 
 #sample = sample()
 #print(sample)
-'''
+
 
 '''
 import requests

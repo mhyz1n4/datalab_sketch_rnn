@@ -2,7 +2,7 @@ import numpy as np
 import json
 import os
 from scipy.special import expit
-#import cv2
+import cv2
 import requests
 
 import time
@@ -306,12 +306,12 @@ def get_sketch(sketch):
         prev_pen = [pen_down, pen_up, pen_end]
     return [x_lines,y_lines]
 
-
+'''
 num_of_boats = 10
 count = 0
 train_result = []
 
-#file = open(“test.txt”,”w”)
+
 for j in range(num_of_boats):
     output = []
     result = generate(dec_lstm, dec_output_w, dec_output_b)
@@ -328,17 +328,21 @@ for j in range(num_of_boats):
                         #data = json.dumps({"data":{"x_data":x_array,"y_data":y_array,"id":j,"check":check}}))
 #file.close()
 
-
-
-
-
-
-
-
 '''
-for k in gen_sketch:
-    x_axis = k[0]
-    y_axis = k[1]
+
+result = []
+gen_sketch = []
+for j in range(20):
+    result = generate(dec_lstm, dec_output_w, dec_output_b)
+    gen_sketch = get_sketch(result)
+
+    img = np.ones((1000,1000,3), np.uint8)
+    #img = cv2.imread('dave.jpg')
+    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+
+    #for k in gen_sketch:
+    x_axis = gen_sketch[0]
+    y_axis = gen_sketch[1]
     length = len(x_axis)
     print(x_axis)
     print(y_axis)
@@ -348,15 +352,17 @@ for k in gen_sketch:
             break
         else:
             cv2.line(img, (x_axis[i], y_axis[i]), (x_axis[i+1], y_axis[i+1]), (255, 255, 255), 5)
+    name = str(j) + '.png'
+    cv2.imwrite(name,img)
 
-cv2.imshow('image',img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+#cv2.imshow('image',img)
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
 
 
 #sample = sample()
 #print(sample)
-'''
+
 
 '''
 import requests
