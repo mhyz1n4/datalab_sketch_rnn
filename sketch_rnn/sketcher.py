@@ -278,9 +278,7 @@ def generate(dec_lstm_, dec_output_w_, dec_output_b_, temperature = None, softma
 max_seq_len = 123
 scale_factor = 99.698
 
-def get_sketch(sketch):
-    #sketch = generate()
-    #print(sketch)
+def get_sketch(sketch)
     xsum, ysum = [0],[0]
     for i,l in enumerate(sketch):
         xsum.append(l[0]+xsum[i])

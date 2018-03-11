@@ -299,7 +299,7 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
 #
 #
 #
-  for _ in range(1000):
+  for _ in range(21):
     step = sess.run(model.global_step)
 
     curr_learning_rate = ((hps.learning_rate - hps.min_learning_rate) *
@@ -320,7 +320,7 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
         model.global_step, model.train_op
     ], feed)
 
-    if step % 2 == 0 and step > 0:
+    if step % 20 == 0 and step > 0:
 
       end = time.time()
       time_taken = end - start
@@ -726,6 +726,12 @@ def main(unused_argv):
   train = datasets[0].strokes
   valid = datasets[1].strokes
   test = datasets[2].strokes
+  train = train[:11000]
+  valid = valid[:1000]
+  test = valid[:1000]
+  datasets[0].strokes = train
+  datasets[1].strokes = valid
+  datasets[2].strokes = test
   print("\n\ntrain length = %d, valid_length = %d, test length = %d\n\n" % (len(train), len(valid), len(test)))
   total_data_size = len(train) + len(valid) + len(test)
 
