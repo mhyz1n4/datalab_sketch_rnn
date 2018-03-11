@@ -154,12 +154,17 @@ dec_num_units = dec_lstm_W_hh.shape[0];
 dec_input_size = dec_lstm_W_xh.shape[0];
 
 print("===============")
-#print(dec_output_w.shape)
-#print(dec_output_b.shape)
-#print(dec_lstm_W_xh.shape)
-#print(dec_lstm_W_hh.shape)
-#print(dec_lstm_bias.shape)
-#print(dec_output_w)
+print("dec_output_w")
+print(dec_output_w.shape)
+print("dec_output_b")
+print(dec_output_b.shape)
+print("dec_lstm_W_xh")
+print(dec_lstm_W_xh.shape)
+print("dec_lstm_W_hh")
+print(dec_lstm_W_hh.shape)
+print("dec_lstm_bias")
+print(dec_lstm_bias.shape)
+
 print("===============")
 
 dec_lstm = SketchLSTMCell(dec_num_units, dec_input_size, dec_lstm_W_xh, dec_lstm_W_hh, dec_lstm_bias)
